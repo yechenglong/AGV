@@ -16,6 +16,7 @@ class RunTcp():
 
 
     def run(self):
+        str1 = ''
         try:
             bufszie = 1024
             self.tmpdata = []
@@ -25,9 +26,12 @@ class RunTcp():
             #print(data)
             time.sleep(0.2)
             self.tmpdata = self.tcpClientSock.recv(bufszie)
-            print(self.tmpdata)
+            for by in self.tmpdata:
+                str1 = str1 + ',' + str(by)
+            return str1
         except Exception as err:
             print(err)
+
 
     def stop(self):
         time.sleep(1)

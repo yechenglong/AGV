@@ -19,22 +19,27 @@ class sendModel():
 
     def getmslg(self):
         if self.arriveaddr =='':
-            data = self.vern + ',' + self.mslg + ',' + self.errc + ',' + self.timp + ',' + self.msid + ',' + self.hcs + ',' \
-                   + self.dvtp + ',' + self.dvlg + ',' + self.dvid + ',' + self.msgtp + ',' + self.token + ',' + self.dcs
+            self.dvid = self.toAscii(self.dvid)
+            data = (self.vern + ',' + self.mslg + ',' + self.errc + ',' + self.timp + ',' + self.msid + ',' + self.hcs + ',' \
+                   + self.dvtp + ',' + self.dvlg + ',' + self.dvid + ',' + self.msgtp + ',' + self.token + ',' + self.dcs).split(',')
         else:
-            data = self.vern + ',' + self.mslg + ',' + self.errc + ',' + self.timp + ',' + self.msid + ',' + self.hcs + ',' \
-                   + self.dvtp + ',' + self.dvlg + ',' + self.dvid + ',' + self.msgtp + ',' + self.token + ',' + self.arriveaddr + ',' +self.dcs
+            self.arriveaddr = self.toAscii(self.arriveaddr)
+            self.dvid = self.toAscii(self.dvid)
+            data = (self.vern + ',' + self.mslg + ',' + self.errc + ',' + self.timp + ',' + self.msid + ',' + self.hcs + ',' \
+                   + self.dvtp + ',' + self.dvlg + ',' + self.dvid + ',' + self.msgtp + ',' + self.token + ',' + self.arriveaddr + ',' +self.dcs).split(',')
         self.mslg = '0,0,0,'+str(len(data))
+        logging.debug("mslg::"+str(self.mslg))
 
     def gethcs(self):
         headdata = (self.vern + ',' + self.mslg + ',' + self.errc + ',' + self.timp + ',' + self.msid).split(',')
+        logging.debug(headdata)
         hcs = 0
         for i in headdata:
             hcs += int(i)
-            if dcs > 256:
-                dcs = dcs - 256
+            if hcs > 256:
+                hcs = hcs - 256
         self.hcs = str(hcs)
-        logging.debug(self.hcs)
+        logging.debug("hcs:  "+ str(self.hcs))
 
     def getdcs(self):
         if self.arriveaddr == '':
@@ -47,9 +52,12 @@ class sendModel():
             if dcs > 256:
                 dcs = dcs - 256
         self.dcs = str(dcs)
-        logging.debug(self.dcs)
+        logging.debug("dcs:  "+ str(self.dcs))
 
     def getdata(self):
+        self.getmslg()
+        self.gethcs()
+        self.getdcs()
         if self.arriveaddr =='':
             data = (self.vern + ',' + self.mslg + ',' + self.errc + ',' + self.timp + ',' + self.msid + ',' + self.hcs + ',' \
                    + self.dvtp + ',' + self.dvlg + ',' + self.dvid + ',' + self.msgtp + ',' + self.token + ',' + self.dcs).split(',')
@@ -72,32 +80,15 @@ class sendModel():
         asciiCode = tmpStr[1:len(tmpStr)]
         return asciiCode
 
-    def getSendMsg(self, ac):
-        if self.arriveaddr == '':
-            logging.debug(
-                'send:' + ac.vern + ',' + ac.mslg + ',' + ac.errc + ',' + ac.timp + ',' + ac.msid + ',' + ac.hcs + ',' + ac.dvtp + ',' + ac.dvlg + ',' + ac.dvid + ',' + ac.msgtp + ',' + ac.token + ',' + ac.arriveaddr + ',' + ac.dcs)
-            data = bytearray(eval(
-                '[' + ac.vern + ',' + ac.mslg + ',' + ac.errc + ',' + ac.timp + ',' + ac.msid + ',' + ac.hcs + ',' + ac.dvtp + ',' + ac.dvlg + ',' + ac.dvid + ',' + ac.msgtp + ',' + ac.token + ',' + ac.arriveaddr + ',' + ac.dcs + ']'))
-        else:
-            logging.debug(
-                'send:' + ac.vern + ',' + ac.mslg + ',' + ac.errc + ',' + ac.timp + ',' + ac.msid + ',' + ac.hcs + ',' + ac.dvtp + ',' + ac.dvlg + ',' + ac.dvid + ',' + ac.msgtp + ',' + ac.token + ',' + ac.dcs)
-            data = bytearray(eval(
-                '[' + ac.vern + ',' + ac.mslg + ',' + ac.errc + ',' + ac.timp + ',' + ac.msid + ',' + ac.hcs + ',' + ac.dvtp + ',' + ac.dvlg + ',' + ac.dvid + ',' + ac.msgtp + ',' + ac.token + ','  + ac.dcs + ']'))
+    def getSendMsg(self):
+        data = self.getdata()
+        logging.debug(
+            'send:' + data)
+        data = bytearray(eval(
+            '[' + data + ']'))
+        logging.debug(data)
         return data
 
-    def getSendMsgtm(self,ac):
-        message = self.toAscii(ac.jsonattr)
-        data = bytearray(eval('['+message+']'))
-        return data
 
-    def run(self, ac):
-        dcstmp = bytearray(eval(
-            '[' + ac.dvtp + ',' + ac.dvlg + ',' + ac.dvid + ',' + ac.msgtp + ',' + ac.token + ',' + ac.arriveaddr + ']'))
-        dcsint = 0
-        for i in range(len(dcstmp)):
-            dcsint = dcsint + dcstmp[i]
-        print(str(dcsint) + " " + str(dcsint % 256))
-        ac.dcs = str(dcsint % 256)
-        return True
 
 
